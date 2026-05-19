@@ -62,6 +62,26 @@ frontend/uploads/*
 !frontend/uploads/.gitkeep
 
 # ==============================
+# Demo / Local Video Files
+# ==============================
+# Never upload large demo videos or recorded walkthroughs to GitHub.
+
+Website Video/
+website video/
+Videos/
+videos/
+Demo Videos/
+demo-videos/
+
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.wmv
+*.flv
+
+# ==============================
 # Screenshots
 # ==============================
 # Keep screenshots tracked for README.
