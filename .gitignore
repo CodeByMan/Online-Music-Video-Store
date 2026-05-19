@@ -1,0 +1,71 @@
+# ==============================
+# One Sound - Git Ignore Rules
+# ==============================
+
+# OS / System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+logs/
+
+# Environment / Local config
+.env
+.env.local
+config.local.php
+database.local.php
+
+# Temporary / Cache files
+tmp/
+temp/
+cache/
+*.tmp
+*.bak
+*.swp
+
+# Dependency folders if added later
+vendor/
+node_modules/
+
+# Composer lock can be tracked if Composer is added later.
+# composer.lock
+
+# NPM build/cache files if frontend tooling is added later
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==============================
+# Uploaded Media Files
+# ==============================
+# Do not upload large/copyrighted media files to GitHub.
+# Keep only folder structure using .gitkeep files.
+
+admin/uploads/images/*
+admin/uploads/music/*
+admin/uploads/videos/*
+
+!admin/uploads/images/.gitkeep
+!admin/uploads/music/.gitkeep
+!admin/uploads/videos/.gitkeep
+
+# If user profile uploads are added later
+frontend/uploads/*
+!frontend/uploads/.gitkeep
+
+# ==============================
+# Screenshots
+# ==============================
+# Keep screenshots tracked for README.
+# docs/screenshots/*.png
+# docs/screenshots/*.jpg
+# docs/screenshots/*.jpeg
+# docs/screenshots/*.webp
