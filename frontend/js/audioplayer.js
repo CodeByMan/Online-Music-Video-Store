@@ -1,188 +1,361 @@
 /*
-	AUTHOR: Osvaldas Valutis, www.osvaldas.info
-*/
-(function($, window, document, undefined) {
-    var isTouch = 'ontouchstart' in window,
-        eStart = isTouch ? 'touchstart' : 'mousedown',
-        eMove = isTouch ? 'touchmove' : 'mousemove',
-        eEnd = isTouch ? 'touchend' : 'mouseup',
-        eCancel = isTouch ? 'touchcancel' : 'mouseup',
-        secondsToTime = function(secs) {
-            var hours = Math.floor(secs / 3600),
-                minutes = Math.floor(secs % 3600 / 60),
-                seconds = Math.ceil(secs % 3600 % 60);
-            return (hours == 0 ? '' : hours > 0 && hours.toString().length < 2 ? '0' + hours + ':' : hours + ':') + (minutes.toString().length < 2 ? '0' + minutes : minutes) + ':' + (seconds.toString().length < 2 ? '0' + seconds : seconds);
-        },
-        canPlayType = function(file) {
-            var audioElement = document.createElement('audio');
-            return !!(audioElement.canPlayType && audioElement.canPlayType('audio/' + file.split('.').pop().toLowerCase() + ';').replace(/no/, ''));
-        };
+ * One Sound audio player compatibility layer.
+ * Preserves the original One Sound audioplayer UI while supporting
+ * secured media.php URLs that do not end with a file extension.
+ */
+(function ($, window, document) {
+    'use strict';
 
-    $.fn.audioPlayer = function(params) {
-        var params = $.extend({
-                classPrefix: 'audioplayer',
-                strPlay: '',
-                strPause: '',
-                strVolume: ''
-            }, params),
-            cssClass = {},
-            cssClassSub = {
-                playPause: 'playpause',
-                playing: 'playing',
-                time: 'time',
-                timeCurrent: 'time-current',
-                timeDuration: 'time-duration',
-                bar: 'bar',
-                barLoaded: 'bar-loaded',
-                barPlayed: 'bar-played',
-                volume: 'volume',
-                volumeButton: 'volume-button',
-                volumeAdjust: 'volume-adjust',
-                noVolume: 'novolume',
-                mute: 'mute',
-                mini: 'mini'
-            };
+    if (!$ || !$.fn || !window.HTMLAudioElement) {
+        return;
+    }
 
-        for (var subName in cssClassSub)
-            cssClass[subName] = params.classPrefix + '-' + cssClassSub[subName];
+    var clamp = function (value, minimum, maximum) {
+        return Math.min(maximum, Math.max(minimum, value));
+    };
 
-        this.each(function() {
-            if ($(this).prop('tagName').toLowerCase() != 'audio')
-                return false;
+    var formatTime = function (seconds) {
+        if (!Number.isFinite(seconds) || seconds < 0) {
+            return '00:00';
+        }
 
-            var $this = $(this),
-                audioFile = $this.attr('src'),
-                isAutoPlay = $this.get(0).getAttribute('autoplay'),
-                isAutoPlay = isAutoPlay === '' || isAutoPlay === 'autoplay' ? true : false,
-                isLoop = $this.get(0).getAttribute('loop'),
-                isLoop = isLoop === '' || isLoop === 'loop' ? true : false,
-                isSupport = false;
+        var totalSeconds = Math.floor(seconds);
+        var hours = Math.floor(totalSeconds / 3600);
+        var minutes = Math.floor((totalSeconds % 3600) / 60);
+        var remainder = totalSeconds % 60;
 
-            if (typeof audioFile === 'undefined') {
-                $this.find('source').each(function() {
-                    audioFile = $(this).attr('src');
-                    if (typeof audioFile !== 'undefined' && canPlayType(audioFile)) {
-                        isSupport = true;
-                        return false;
-                    }
-                });
-            } else if (canPlayType(audioFile)) isSupport = true;
+        var minuteText = String(minutes).padStart(2, '0');
+        var secondText = String(remainder).padStart(2, '0');
 
-            var thePlayer = $('<div class="' + params.classPrefix + '">' + (isSupport ? $('<div>').append($this.eq(0).clone()).html() : '<embed src="' + audioFile + '" width="0" height="0" volume="100" autostart="' + isAutoPlay.toString() + '" loop="' + isLoop.toString() + '" />') + '<div class="' + cssClass.playPause + '" title="' + params.strPlay + '"><a href="#">' + params.strPlay + '</a></div></div>'),
-                theAudio = isSupport ? thePlayer.find('audio') : thePlayer.find('embed'),
-                theAudio = theAudio.get(0);
+        return hours > 0
+            ? String(hours).padStart(2, '0') + ':' + minuteText + ':' + secondText
+            : minuteText + ':' + secondText;
+    };
 
-            if (isSupport) {
-                thePlayer.find('audio').css({
-                    'width': 0,
-                    'height': 0,
-                    'visibility': 'hidden'
-                });
-                thePlayer.append('<div class="' + cssClass.time + ' ' + cssClass.timeCurrent + '"></div><div class="' + cssClass.bar + '"><div class="' + cssClass.barLoaded + '"></div><div class="' + cssClass.barPlayed + '"></div></div><div class="' + cssClass.time + ' ' + cssClass.timeDuration + '"></div><div class="' + cssClass.volume + '"><div class="' + cssClass.volumeButton + '" title="' + params.strVolume + '"><a href="#">' + params.strVolume + '</a></div><div class="' + cssClass.volumeAdjust + '"><div><div></div></div></div></div>');
+    var percentageFromPointer = function (event, element) {
+        var originalEvent = event.originalEvent || event;
+        var pointer = originalEvent.touches && originalEvent.touches.length
+            ? originalEvent.touches[0]
+            : originalEvent.changedTouches && originalEvent.changedTouches.length
+                ? originalEvent.changedTouches[0]
+                : originalEvent;
 
-                var theBar = thePlayer.find('.' + cssClass.bar),
-                    barPlayed = thePlayer.find('.' + cssClass.barPlayed),
-                    barLoaded = thePlayer.find('.' + cssClass.barLoaded),
-                    timeCurrent = thePlayer.find('.' + cssClass.timeCurrent),
-                    timeDuration = thePlayer.find('.' + cssClass.timeDuration),
-                    volumeButton = thePlayer.find('.' + cssClass.volumeButton),
-                    volumeAdjuster = thePlayer.find('.' + cssClass.volumeAdjust + ' > div'),
-                    volumeDefault = 0,
-                    adjustCurrentTime = function(e) {
-                        theRealEvent = isTouch ? e.originalEvent.touches[0] : e;
-                        theAudio.currentTime = Math.round((theAudio.duration * (theRealEvent.pageX - theBar.offset().left)) / theBar.width());
-                    },
-                    adjustVolume = function(e) {
-                        theRealEvent = isTouch ? e.originalEvent.touches[0] : e;
-                        theAudio.volume = Math.abs((theRealEvent.pageX - volumeAdjuster.offset().left) / volumeAdjuster.width());
-                    },
-                    updateLoadBar = setInterval(function() {
-                      if (theAudio.buffered.length > 0) {
-                        barLoaded.width((theAudio.buffered.end(0) / theAudio.duration) * 100 + '%');
-                        if (theAudio.buffered.end(0) >= theAudio.duration)
-                            clearInterval(updateLoadBar);
-                      }
-                    }, 100);
+        var rectangle = element.getBoundingClientRect();
 
-                var volumeTestDefault = theAudio.volume,
-                    volumeTestValue = theAudio.volume = 0.111;
-                if (Math.round(theAudio.volume * 1000) / 1000 == volumeTestValue) theAudio.volume = volumeTestDefault;
-                else thePlayer.addClass(cssClass.noVolume);
+        if (!pointer || rectangle.width <= 0) {
+            return 0;
+        }
 
-                timeDuration.html('&hellip;');
-                timeCurrent.text(secondsToTime(0));
+        return clamp((pointer.clientX - rectangle.left) / rectangle.width, 0, 1);
+    };
 
-                theAudio.addEventListener('loadeddata', function() {
-                    timeDuration.text(secondsToTime(theAudio.duration));
-                    volumeAdjuster.find('div').width(theAudio.volume * 100 + '%');
-                    volumeDefault = theAudio.volume;
-                });
+    $.fn.audioPlayer = function (options) {
+        var settings = $.extend({
+            classPrefix: 'audioplayer',
+            strPlay: 'Play',
+            strPause: 'Pause',
+            strVolume: 'Mute or unmute'
+        }, options || {});
 
-                theAudio.addEventListener('timeupdate', function() {
-                    timeCurrent.text(secondsToTime(theAudio.currentTime));
-                    barPlayed.width((theAudio.currentTime / theAudio.duration) * 100 + '%');
-                });
+        return this.each(function () {
+            var audio = this;
+            var $audio = $(audio);
 
-                theAudio.addEventListener('volumechange', function() {
-                    volumeAdjuster.find('div').width(theAudio.volume * 100 + '%');
-                    if (theAudio.volume > 0 && thePlayer.hasClass(cssClass.mute)) thePlayer.removeClass(cssClass.mute);
-                    if (theAudio.volume <= 0 && !thePlayer.hasClass(cssClass.mute)) thePlayer.addClass(cssClass.mute);
-                });
+            if (
+                !audio ||
+                audio.tagName.toLowerCase() !== 'audio' ||
+                $audio.data('oneSoundAudioPlayer')
+            ) {
+                return;
+            }
 
-                theAudio.addEventListener('ended', function() {
-                    thePlayer.removeClass(cssClass.playing);
-                });
+            $audio.data('oneSoundAudioPlayer', true);
 
-                theBar.on(eStart, function(e) {
-                        adjustCurrentTime(e);
-                        theBar.on(eMove, function(e) {
-                            adjustCurrentTime(e);
-                        });
-                    })
-                    .on(eCancel, function() {
-                        theBar.unbind(eMove);
-                    });
+            var prefix = settings.classPrefix;
+            var $player = $('<div>', { 'class': prefix });
+            var $playPause = $('<div>', {
+                'class': prefix + '-playpause',
+                'title': settings.strPlay,
+                'role': 'button',
+                'tabindex': '0',
+                'aria-label': settings.strPlay
+            }).append($('<a>', { 'href': '#', 'aria-hidden': 'true' }));
+            var $currentTime = $('<div>', {
+                'class': prefix + '-time ' + prefix + '-time-current'
+            }).text('00:00');
+            var $bar = $('<div>', {
+                'class': prefix + '-bar',
+                'role': 'slider',
+                'tabindex': '0',
+                'aria-label': 'Audio progress',
+                'aria-valuemin': '0',
+                'aria-valuemax': '100',
+                'aria-valuenow': '0'
+            });
+            var $barLoaded = $('<div>', { 'class': prefix + '-bar-loaded' });
+            var $barPlayed = $('<div>', { 'class': prefix + '-bar-played' });
+            var $duration = $('<div>', {
+                'class': prefix + '-time ' + prefix + '-time-duration'
+            }).html('&hellip;');
+            var $volume = $('<div>', { 'class': prefix + '-volume' });
+            var $volumeButton = $('<div>', {
+                'class': prefix + '-volume-button',
+                'title': settings.strVolume,
+                'role': 'button',
+                'tabindex': '0',
+                'aria-label': settings.strVolume,
+                'aria-pressed': 'false'
+            }).append($('<a>', { 'href': '#', 'aria-hidden': 'true' }));
+            var $volumeAdjust = $('<div>', {
+                'class': prefix + '-volume-adjust',
+                'role': 'slider',
+                'tabindex': '0',
+                'aria-label': 'Volume',
+                'aria-valuemin': '0',
+                'aria-valuemax': '100',
+                'aria-valuenow': String(Math.round(audio.volume * 100))
+            });
+            var $volumeTrack = $('<div>').append($('<div>'));
 
-                volumeButton.on('click', function() {
-                    if (thePlayer.hasClass(cssClass.mute)) {
-                        thePlayer.removeClass(cssClass.mute);
-                        theAudio.volume = volumeDefault;
-                    } else {
-                        thePlayer.addClass(cssClass.mute);
-                        volumeDefault = theAudio.volume;
-                        theAudio.volume = 0;
-                    }
-                    return false;
-                });
+            $bar.append($barLoaded, $barPlayed);
+            $volumeAdjust.append($volumeTrack);
+            $volume.append($volumeButton, $volumeAdjust);
 
-                volumeAdjuster.on(eStart, function(e) {
-                        adjustVolume(e);
-                        volumeAdjuster.on(eMove, function(e) {
-                            adjustVolume(e);
-                        });
-                    })
-                    .on(eCancel, function() {
-                        volumeAdjuster.unbind(eMove);
-                    });
-            } else thePlayer.addClass(cssClass.mini);
+            $audio.before($player);
+            $player.append(
+                $audio,
+                $playPause,
+                $currentTime,
+                $bar,
+                $duration,
+                $volume
+            );
 
-            if (isAutoPlay) thePlayer.addClass(cssClass.playing);
+            audio.controls = false;
+            audio.preload = audio.preload || 'metadata';
 
-            thePlayer.find('.' + cssClass.playPause).on('click', function() {
-                if (thePlayer.hasClass(cssClass.playing)) {
-                    $(this).attr('title', params.strPlay).find('a').html(params.strPlay);
-                    thePlayer.removeClass(cssClass.playing);
-                    isSupport ? theAudio.pause() : theAudio.Stop();
-                } else {
-                    $(this).attr('title', params.strPause).find('a').html(params.strPause);
-                    thePlayer.addClass(cssClass.playing);
-                    isSupport ? theAudio.play() : theAudio.Play();
-                }
-                return false;
+            $audio.css({
+                width: 0,
+                height: 0,
+                visibility: 'hidden',
+                position: 'absolute',
+                left: '-9999px'
             });
 
-            $this.replaceWith(thePlayer);
+            var previousVolume = audio.volume > 0 ? audio.volume : 1;
+            var draggingProgress = false;
+            var draggingVolume = false;
+
+            var setPlayingState = function (playing) {
+                $player.toggleClass(prefix + '-playing', playing);
+                $playPause
+                    .attr('title', playing ? settings.strPause : settings.strPlay)
+                    .attr('aria-label', playing ? settings.strPause : settings.strPlay);
+            };
+
+            var updateDuration = function () {
+                $duration.text(formatTime(audio.duration));
+            };
+
+            var updateProgress = function () {
+                var durationValue = Number.isFinite(audio.duration) && audio.duration > 0
+                    ? audio.duration
+                    : 0;
+                var percentage = durationValue > 0
+                    ? clamp((audio.currentTime / durationValue) * 100, 0, 100)
+                    : 0;
+
+                $currentTime.text(formatTime(audio.currentTime));
+                $barPlayed.css('width', percentage + '%');
+                $bar.attr('aria-valuenow', String(Math.round(percentage)));
+            };
+
+            var updateBuffered = function () {
+                if (!Number.isFinite(audio.duration) || audio.duration <= 0 || audio.buffered.length === 0) {
+                    $barLoaded.css('width', '0%');
+                    return;
+                }
+
+                try {
+                    var bufferedEnd = audio.buffered.end(audio.buffered.length - 1);
+                    var percentage = clamp((bufferedEnd / audio.duration) * 100, 0, 100);
+                    $barLoaded.css('width', percentage + '%');
+                } catch (error) {
+                    $barLoaded.css('width', '0%');
+                }
+            };
+
+            var updateVolume = function () {
+                var volumePercentage = Math.round(audio.volume * 100);
+                var muted = audio.muted || audio.volume === 0;
+
+                $player.toggleClass(prefix + '-mute', muted);
+                $volumeTrack.children('div').css('width', volumePercentage + '%');
+                $volumeAdjust.attr('aria-valuenow', String(volumePercentage));
+                $volumeButton.attr('aria-pressed', muted ? 'true' : 'false');
+            };
+
+            var togglePlayback = function () {
+                if (audio.paused || audio.ended) {
+                    $('audio').not(audio).each(function () {
+                        this.pause();
+                    });
+
+                    var playPromise = audio.play();
+                    if (playPromise && typeof playPromise.catch === 'function') {
+                        playPromise.catch(function () {
+                            setPlayingState(false);
+                        });
+                    }
+                } else {
+                    audio.pause();
+                }
+            };
+
+            var seekFromEvent = function (event) {
+                if (!Number.isFinite(audio.duration) || audio.duration <= 0) {
+                    return;
+                }
+
+                audio.currentTime = percentageFromPointer(event, $bar.get(0)) * audio.duration;
+                updateProgress();
+            };
+
+            var setVolumeFromEvent = function (event) {
+                var nextVolume = percentageFromPointer(event, $volumeAdjust.get(0));
+                audio.muted = false;
+                audio.volume = nextVolume;
+
+                if (nextVolume > 0) {
+                    previousVolume = nextVolume;
+                }
+            };
+
+            $playPause.on('click', function (event) {
+                event.preventDefault();
+                togglePlayback();
+            }).on('keydown', function (event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    togglePlayback();
+                }
+            });
+
+            $bar.on('mousedown touchstart', function (event) {
+                draggingProgress = true;
+                seekFromEvent(event);
+                event.preventDefault();
+            }).on('click', function (event) {
+                seekFromEvent(event);
+            }).on('keydown', function (event) {
+                if (!Number.isFinite(audio.duration) || audio.duration <= 0) {
+                    return;
+                }
+
+                if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+                    event.preventDefault();
+                    var direction = event.key === 'ArrowRight' ? 5 : -5;
+                    audio.currentTime = clamp(audio.currentTime + direction, 0, audio.duration);
+                    updateProgress();
+                }
+            });
+
+            $volumeButton.on('click', function (event) {
+                event.preventDefault();
+
+                if (audio.muted || audio.volume === 0) {
+                    audio.muted = false;
+                    audio.volume = previousVolume > 0 ? previousVolume : 1;
+                } else {
+                    previousVolume = audio.volume;
+                    audio.muted = true;
+                }
+            }).on('keydown', function (event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    $volumeButton.trigger('click');
+                }
+            });
+
+            $volumeAdjust.on('mousedown touchstart', function (event) {
+                draggingVolume = true;
+                setVolumeFromEvent(event);
+                event.preventDefault();
+            }).on('click', function (event) {
+                setVolumeFromEvent(event);
+            }).on('keydown', function (event) {
+                if (
+                    event.key === 'ArrowDown' ||
+                    event.key === 'ArrowLeft' ||
+                    event.key === 'ArrowUp' ||
+                    event.key === 'ArrowRight'
+                ) {
+                    event.preventDefault();
+                    var change = event.key === 'ArrowUp' || event.key === 'ArrowRight' ? 0.05 : -0.05;
+                    audio.muted = false;
+                    audio.volume = clamp(audio.volume + change, 0, 1);
+
+                    if (audio.volume > 0) {
+                        previousVolume = audio.volume;
+                    }
+                }
+            });
+
+            $(document).on('mousemove.oneSoundAudio touchmove.oneSoundAudio', function (event) {
+                if (draggingProgress) {
+                    seekFromEvent(event);
+                }
+
+                if (draggingVolume) {
+                    setVolumeFromEvent(event);
+                }
+            }).on('mouseup.oneSoundAudio touchend.oneSoundAudio touchcancel.oneSoundAudio', function () {
+                draggingProgress = false;
+                draggingVolume = false;
+            });
+
+            audio.addEventListener('play', function () {
+                setPlayingState(true);
+            });
+            audio.addEventListener('pause', function () {
+                setPlayingState(false);
+            });
+            audio.addEventListener('ended', function () {
+                setPlayingState(false);
+                updateProgress();
+            });
+            audio.addEventListener('loadedmetadata', function () {
+                updateDuration();
+                updateProgress();
+                updateBuffered();
+            });
+            audio.addEventListener('durationchange', updateDuration);
+            audio.addEventListener('timeupdate', updateProgress);
+            audio.addEventListener('progress', updateBuffered);
+            audio.addEventListener('volumechange', updateVolume);
+            audio.addEventListener('canplay', updateBuffered);
+            audio.addEventListener('error', function () {
+                setPlayingState(false);
+                $player.addClass(prefix + '-error');
+            });
+
+            updateDuration();
+            updateProgress();
+            updateBuffered();
+            updateVolume();
+
+            if (audio.autoplay) {
+                var autoplayPromise = audio.play();
+                if (autoplayPromise && typeof autoplayPromise.catch === 'function') {
+                    autoplayPromise.catch(function () {
+                        setPlayingState(false);
+                    });
+                }
+            }
         });
-        return this;
     };
-})(jQuery, window, document);
+
+    $(function () {
+        $('audio').audioPlayer();
+    });
+}(window.jQuery, window, document));

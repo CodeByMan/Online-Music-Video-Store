@@ -1,17 +1,12 @@
 <?php
-session_start();
-include 'database.php';
+require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
-$is_logged_in = isset($_SESSION['user_name']) && isset($_SESSION['user_id']);
-
-if (!isset($_SESSION['user_name'])) {
-    header("Location: login.php");
-    exit(); 
-}
-
-$role_id = $_SESSION['role_id'];
-$user_id = $_SESSION['user_id'];
-
+$current_user = $current_user ?? require_admin($conn);
+$is_logged_in = true;
+$role_id = (int) $current_user['role_id'];
+$user_id = (int) $current_user['user_id'];
+$user_name = $current_user['user_name'];
+$user_image = $current_user['user_image'];
 ?>
 
 <!DOCTYPE html>
@@ -23,26 +18,20 @@ $user_id = $_SESSION['user_id'];
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="author" content="Muhammad Ali Nawaz">
 
     <title>One Sound - Admin Dashboard</title>
 
-    <!-- <link rel="manifest" href="site.webmanifest"> -->
     <link rel="shortcut icon" type="image/x-icon" href="img/favicon.png">
 
-    <!-- Custom fonts for this template-->
+    <!-- Administrator interface fonts -->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Font Awesome for Play Icon -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
 
 
-    <!-- Custom styles for this template-->
+    <!-- Administrator interface styles -->
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
 
 </head>
@@ -60,7 +49,7 @@ $user_id = $_SESSION['user_id'];
                 <div class="sidebar-brand-icon">
                 <i class="fa fa-music mt-2" style="font-size: 20px;"></i>
                 </div>
-                <img src="img/logo.png" class="sidebar-brand-text mx-2">
+                <img src="img/logo.png" class="sidebar-brand-text mx-2" alt="One Sound">
             </a>
 
             <!-- Divider -->
@@ -91,7 +80,6 @@ $user_id = $_SESSION['user_id'];
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Roles Information:</h6>
-                        <a class="collapse-item" href="add_role.php">Add Roles</a>
                         <a class="collapse-item" href="view_role.php">View Roles</a>
                     </div>
                 </div>
@@ -208,9 +196,9 @@ $user_id = $_SESSION['user_id'];
                 <!-- Dropdown - Messages -->
                 <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
                     aria-labelledby="searchDropdown">
-                    <form  method="POST" action="search.php" class="form-inline mr-auto w-100 navbar-search">
+                    <form method="GET" action="search_audio.php" class="form-inline mr-auto w-100 navbar-search">
                         <div class="input-group">
-                            <input type="search" name="search_query" class="form-control bg-light border-0 small"
+                            <input type="search" name="q" class="form-control bg-light border-0 small"
                                 placeholder="Search for..." aria-label="Search"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
@@ -236,16 +224,10 @@ $user_id = $_SESSION['user_id'];
             <li class="nav-item dropdown no-arrow">
                 <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <?php
-                    $user = mysqli_query($conn, "SELECT * FROM users WHERE user_id = '$user_id'");
-                    while ($row = mysqli_fetch_assoc($user)) {
-                        $user_name = $row['user_name'];
-                        $user_image = $row['user_image'];  // Fetch the image path from the database
-                    }
-                    ?>
-                    <img class="img-profile rounded-circle mr-2" src="img/profile-img/<?php echo $user_image; ?>" alt="User Image">
+
+                    <img class="img-profile rounded-circle mr-2" src="img/profile-img/<?php echo e($user_image); ?>" alt="User Image">
                     <span class="d-none d-lg-inline text-gray-600 small">
-                        <b><?php echo $user_name; ?></b>
+                        <b><?php echo e($user_name); ?></b>
                     </span>
                 </a>
                 <!-- Dropdown - User Information -->
@@ -266,4 +248,5 @@ $user_id = $_SESSION['user_id'];
         </ul>
 
     </nav>
+    <?php echo render_flash_messages(); ?>
     <!-- End of Topbar -->

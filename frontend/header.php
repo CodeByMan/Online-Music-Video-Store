@@ -1,38 +1,25 @@
 <?php
-include 'database.php';
+require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
-$is_logged_in = isset($_SESSION['user_name']) && isset($_SESSION['user_id']);
-
-if (!$is_logged_in && basename($_SERVER['PHP_SELF']) !== 'signin.php') {
-    header("Location: signin.php");
-    exit();
-}
-
-if ($is_logged_in) {
-    $user_id = $_SESSION['user_id'];
-
-    $user = mysqli_query($conn, "SELECT * FROM users WHERE user_id = '$user_id'");
-    while ($row = mysqli_fetch_assoc($user)) {
-        $user_name = $row['user_name'];
-        $user_image = $row['user_image'];
-    }
-}
+$current_user = $current_user ?? require_frontend_user($conn);
+$is_logged_in = true;
+$user_id = (int) $current_user['user_id'];
+$user_name = $current_user['user_name'];
+$user_image = $current_user['user_image'];
 ?>
 <!doctype html>
-<html class="no-js" lang="zxx">
+<html class="no-js" lang="en">
 
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>One Sound - Music Unlimited</title>
-    <meta name="description" content="">
+    <meta name="description" content="One Sound music and video platform">
+    <meta name="author" content="Muhammad Ali Nawaz">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- <link rel="manifest" href="site.webmanifest"> -->
     <link rel="shortcut icon" type="image/x-icon" href="img/favicon.png">
-    <!-- Place favicon.ico in the root directory -->
 
-    <!-- CSS here -->
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/owl.carousel.min.css">
     <link rel="stylesheet" href="css/magnific-popup.css">
@@ -47,7 +34,6 @@ if ($is_logged_in) {
     <link rel="stylesheet" href="css/slicknav.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/styles.css">
-    <!-- <link rel="stylesheet" href="css/responsive.css"> -->
 </head>
 
 <body>
@@ -59,16 +45,13 @@ if ($is_logged_in) {
                 <div class="container-fluid">
                     <div class="header_bottom_border">
                         <div class="row align-items-center">
-                            <!-- Logo on the left side -->
                             <div class="col-6 col-lg-5">
                                 <div class="logo">
                                     <a href="index.php">
-                                        <img src="img/core-img/logo.png" alt="">
+                                        <img src="img/core-img/logo.png" alt="One Sound">
                                     </a>
                                 </div>
                             </div>
-                            
-                            <!-- Navigation menu on the right side -->
                             <div class="col-6 col-lg-7">
                                 <div class="main-menu d-none d-lg-block">
                                     <nav>
@@ -81,37 +64,36 @@ if ($is_logged_in) {
                                             <li>
                                                 <a href="#" class="text-danger">
                                                     <span class="badge custom-badge bg-danger text-white pt-2">Profile</span>
-                                                    <?php 
-                                                    if ($is_logged_in) {
-                                                        echo htmlspecialchars($_SESSION['user_name']);
-                                                    }
-                                                    ?>
+                                                    <?php echo e($user_name); ?>
                                                     <i class="ti-angle-down"></i>
                                                 </a>
                                                 <ul class="submenu">
                                                     <li><a href="profile.php">
                                                         View Profile
-                                                        <img class="img-profile rounded-circle" src="img/banner/<?php echo $user_image; ?>" alt="img" style="width: 40px; height: 40px; object-fit: cover;">
+                                                        <img class="img-profile rounded-circle" src="img/banner/<?php echo e($user_image); ?>" alt="Profile image" style="width: 40px; height: 40px; object-fit: cover;">
                                                         </a>
                                                     </li>
                                                     <hr>
-                                                    <li><a href="logout.php">Logout</a></li>
+                                                    <li>
+                                                        <a href="logout.php" onclick="event.preventDefault(); document.getElementById('frontend-logout-form').submit();">Logout</a>
+                                                        <form id="frontend-logout-form" action="logout.php" method="post" style="display: none;">
+                                                            <?php echo csrf_field(); ?>
+                                                        </form>
+                                                    </li>
                                                 </ul>
                                             </li>
                                         </ul>
                                     </nav>
                                 </div>
                             </div>
-
-                            <!-- Mobile menu (hidden on larger screens) -->
                             <div class="col-12 d-block d-lg-none mt-2">
                                 <div class="mobile_menu d-block d-lg-none"></div>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     </header>
     <!-- header-end -->
+    <?php echo render_flash_messages(); ?>

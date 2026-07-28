@@ -1,148 +1,141 @@
 <h1 align="center">🎵 One Sound</h1>
 
 <p align="center">
-  <b>A full-stack PHP & MySQL music/video streaming platform with authentication, admin dashboard, media management, search, reviews, and contact workflows.</b>
+  <b>A responsive Core PHP and MySQL music and video platform with public homepage previews, secure authentication, an administration dashboard, media management, search, reviews, ratings, and contact-message workflows.</b>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/PHP-8.x-777BB4?style=for-the-badge&logo=php&logoColor=white" />
-  <img src="https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white" />
-  <img src="https://img.shields.io/badge/Bootstrap-Responsive_UI-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white" />
-  <img src="https://img.shields.io/badge/Admin-SB_Admin_2-4e73df?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Auth-Session_Based-success?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/PHP-8.x-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.x" />
+  <img src="https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL" />
+  <img src="https://img.shields.io/badge/Bootstrap-Responsive_UI-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white" alt="Bootstrap" />
+  <img src="https://img.shields.io/badge/Auth-Session_Based-success?style=for-the-badge" alt="Session authentication" />
+  <img src="https://img.shields.io/badge/Tests-PHPUnit-blue?style=for-the-badge" alt="PHPUnit" />
 </p>
 
 <p align="center">
-  <b>Music Streaming</b> • <b>Video Gallery</b> • <b>Admin Panel</b> • <b>User Reviews</b> • <b>Media Uploads</b>
+  <b>Public Media Previews</b> • <b>Full Music Library</b> • <b>Video Gallery</b> • <b>Admin Panel</b> • <b>User Reviews</b>
 </p>
 
 ---
 
 ## 📸 Project Screenshots
 
-> Add your real screenshots inside `docs/screenshots/` using the same filenames below.
-
-| Login Page | Register Page |
+| Home | About |
 |---|---|
-| ![Login Page](docs/screenshots/login.png) | ![Register Page](docs/screenshots/register.png) |
+| ![One Sound public homepage](docs/screenshots/homepage.png) | ![One Sound Music Magic about section](docs/screenshots/about.png) |
 
-| Homepage | Music Library |
+| Latest Albums | Collections |
 |---|---|
-| ![Homepage](docs/screenshots/homepage.png) | ![Music Library](docs/screenshots/music-page.png) |
+| ![One Sound latest album cards](docs/screenshots/albums.png) | ![One Sound collections section](docs/screenshots/collections.png) |
 
-| Song Detail & Reviews | Video Gallery |
-|---|---|
-| ![Song Detail](docs/screenshots/song-detail.png) | ![Video Gallery](docs/screenshots/video-gallery.png) |
-
-| Admin Dashboard | Admin Media Management |
-|---|---|
-| ![Admin Dashboard](docs/screenshots/admin-dashboard.png) | ![Admin Media Management](docs/screenshots/admin-media.png) |
+> Screenshots must use fictional, original, or properly licensed demo media. Do not publish screenshots containing personal information, credentials, local filesystem paths, operating-system watermarks, or unlicensed commercial catalog artwork.
 
 ---
 
 ## 🚀 Project Overview
 
-**One Sound** is a complete media streaming web application built with **Core PHP, MySQL, Bootstrap, JavaScript, and SB Admin 2**. It provides a user-facing platform where listeners can browse, search, play, and review music/videos, while administrators can manage the full content catalog from a dedicated dashboard.
+**One Sound** is a complete educational media website built with **Core PHP, MySQL/MariaDB, HTML5, CSS3, Bootstrap, JavaScript, and jQuery**.
 
-This project demonstrates practical full-stack PHP development including authentication, role-based access flow, relational database design, media uploads, admin CRUD operations, dynamic search, and user-generated reviews.
+Visitors can open the homepage without signing in and immediately preview the latest songs, videos, albums, collections, and gallery content. Registration and login unlock the complete music, video, album, search, review, profile, and contact workflows. Administrators use a separate dashboard to manage users, categories, audio, video, and contact messages.
+
+The project demonstrates practical junior-to-intermediate PHP development while intentionally remaining a traditional Core PHP application rather than a framework conversion.
 
 ---
 
 ## 🎯 Key Highlights
 
-- 🎧 Music streaming with HTML5 audio playback  
-- 🎬 Video listing and popup video playback  
-- 👤 User registration, login, profile update, and password update  
-- 🛡️ Separate admin and user login flows  
-- 🧑‍💼 Admin dashboard for managing roles, users, categories, music, videos, and messages  
-- 🔍 Search/filter system for songs, albums, videos, artists, genres, languages, and years  
-- ⭐ Review and rating system for audio tracks  
-- 📩 Contact form with pending/seen message management  
-- 🗄️ Relational MySQL database with foreign-key relationships  
-- 🎨 Responsive frontend and professional admin UI  
+- 🎧 Public playback for the homepage’s initially displayed audio previews
+- 🎬 Public playback for the homepage’s initially displayed video previews
+- 🔐 Authentication required for the complete music, video, and album libraries
+- 👤 Secure registration, login, logout, profile update, and password update
+- 🛡️ Fixed Administrator and User authorization roles
+- 🧑‍💼 Administration dashboard for catalog and account management
+- 🔍 Search and filtering by song, album, video, artist, genre, language, and year
+- ⭐ One review and rating per user for each audio track
+- 📩 Contact messages with administrator moderation
+- 📁 Validated image, audio, and video uploads
+- 🔒 CSRF protection, prepared statements, session regeneration, and rate limiting
+- 🧪 PHPUnit tests, portable PHP linting, repository checks
 
 ---
 
 ## ✨ Features
 
-### 👥 User Features
+### 🌐 Public Homepage Features
 
 | Feature | Description |
 |---|---|
-| Authentication | Users can sign up, sign in, and logout securely |
-| Music Library | Browse songs with album, artist, genre, language, and year metadata |
-| Audio Player | Play songs directly through browser-based audio controls |
-| Album Browsing | Explore albums and view related songs |
-| Video Gallery | Watch uploaded video content through popup/video playback |
-| Search System | Search audio, albums, and videos by metadata |
-| Reviews & Ratings | Add, edit, and delete personal song reviews |
-| Profile Management | Update profile details, image, and password |
-| Contact Form | Submit messages to the platform administrator |
+| Homepage | View the complete landing-page layout without authentication |
+| Trending Song | Listen to the latest ranked song directly from the homepage |
+| Latest Music | Listen to the initially displayed audio previews |
+| Latest Albums | View the initially displayed album cards |
+| Latest Videos | Watch the initially displayed video previews |
+| Collections | View top albums, new hits, and popular artists |
+| Gallery | Browse the homepage image gallery |
+| Restricted “More” Links | Sign-in is required for full audio, video, and album libraries |
 
-### 🧑‍💼 Admin Features
+### 👥 Authenticated User Features
 
 | Feature | Description |
 |---|---|
-| Dashboard | View total roles, users, music, videos, and pending messages |
-| Role Management | Add, view, edit, and delete user roles |
-| User Management | Manage users and assign roles |
-| Category Management | Add artist, album, genre, language, year, and cover image metadata |
-| Music Management | Upload, edit, search, and delete music files |
-| Video Management | Upload, edit, search, and delete video files |
-| Message Management | View, mark as read, and delete contact messages |
+| Authentication | Create an account, sign in securely, and sign out through POST/CSRF protection |
+| Music Library | Browse paginated songs and song details |
+| Album Browsing | View albums and the songs assigned to each album |
+| Video Library | Browse and play the complete video catalog |
+| Search | Search audio, albums, and videos using bookmarkable GET requests |
+| Reviews & Ratings | Add, update, and delete only your own reviews |
+| Profile Management | Update profile information and profile image |
+| Password Security | Change password only after confirming the current password |
+| Contact | Submit contact messages to the administrator |
+
+### 🧑‍💼 Administrator Features
+
+| Feature | Description |
+|---|---|
+| Dashboard | View catalog, user, and message totals |
+| User Management | Add, update, list, and safely remove users |
+| Fixed Roles | View the Administrator and User roles supported by the application |
+| Category Management | Manage artist, album, genre, language, year, and cover metadata |
+| Music Management | Upload, update, search, list, and remove audio records |
+| Video Management | Upload, update, search, list, and remove video records |
+| Message Management | View, mark as read, and remove contact messages |
+| Account Security | Update administrator profile and password securely |
 
 ---
 
-## 🛠 Tech Stack
+## 🛠 Technologies
 
 | Layer | Technologies |
 |---|---|
-| Backend | PHP, MySQLi |
-| Database | MySQL / MariaDB |
+| Backend | Core PHP 8.x, MySQLi, procedural modules and helpers |
+| Database | MySQL / MariaDB with foreign keys, indexes, constraints, and transactions |
 | Frontend | HTML5, CSS3, Bootstrap, JavaScript, jQuery |
-| Admin UI | SB Admin 2, Bootstrap, Font Awesome |
-| Media | HTML5 Audio, HTML5 Video, local upload storage |
-| Authentication | PHP Sessions, `password_hash()`, `password_verify()` |
-| UI Libraries | Owl Carousel, Magnific Popup, SlickNav, WOW.js, Animate.css |
+| Media | HTML5 audio/video, byte-range streaming, private media storage |
+| Authentication | PHP sessions, `password_hash()`, `password_verify()` |
+| Security | Prepared statements, CSRF, authorization, escaping, validation, throttling |
+| Testing | PHPUnit, portable PHP lint script, repository verification |
 
 ---
 
-## 🏗 Architecture Overview
-
-The project follows a custom PHP modular structure with separate areas for the public frontend and admin dashboard.
+## 🏗 Folder Structure
 
 ```text
 One Sound/
-├── admin/              # Admin dashboard, CRUD modules, uploads, admin assets
-├── frontend/           # User-facing music/video platform
-├── database/           # MySQL database dump
-└── readme.txt          # Original basic project note
-```
-
-### Application Flow
-
-```text
-User Registration/Login
-        ↓
-Browse Music / Albums / Videos
-        ↓
-Search or Filter Media
-        ↓
-Play Audio / Watch Video
-        ↓
-Submit Review or Contact Message
-```
-
-```text
-Admin Login
-        ↓
-Dashboard Overview
-        ↓
-Manage Categories
-        ↓
-Upload Music & Videos
-        ↓
-Manage Users, Roles & Messages
+├── admin/                   # Administration pages and compiled admin assets
+│   ├── uploads/images/      # Runtime catalog images
+│   └── vendor/              # Required compiled administration dependencies
+├── database/                # Fresh MySQL schema and fictional demo records
+├── frontend/                # Public and authenticated user-facing pages
+│   ├── partials/            # Shared homepage/header/footer components
+│   └── media.php            # Controlled audio/video delivery endpoint
+├── includes/                # Core PHP configuration, database, auth and validation helpers
+├── scripts/                 # Migration, linting and repository-verification scripts
+├── tests/                   # PHPUnit source and database integration tests
+├── composer.json            # Development/test dependencies and scripts
+├── composer.lock            # Reproducible Composer dependency versions
+├── config.example.php       # Safe local-configuration example
+├── LICENSE                  # MIT License
+└── README.md                # Project documentation
 ```
 
 ---
@@ -155,240 +148,200 @@ Database file:
 database/sounds.sql
 ```
 
-Main tables:
-
 | Table | Purpose |
 |---|---|
-| `roles` | Stores `Administrator` and `User` role types |
-| `users` | Stores user/admin accounts and profile details |
-| `categories` | Stores artist, album, genre, language, year, and cover image |
-| `audio` | Stores uploaded music records linked to categories |
-| `videos` | Stores uploaded video records linked to categories |
-| `review_audio` | Stores reviews and ratings for songs |
-| `messages` | Stores contact form submissions with pending/seen status |
-
-### Core Relationships
-
-| Relationship | Description |
-|---|---|
-| `users.role_id → roles.role_id` | Connects each account to a role |
-| `audio.category_id → categories.category_id` | Links each song to album/artist metadata |
-| `videos.category_id → categories.category_id` | Links each video to album/artist metadata |
-| `review_audio.audio_id` | Connects reviews to audio tracks |
-| `review_audio.user_id` | Connects reviews to users |
+| `roles` | Stores the fixed Administrator and User roles |
+| `users` | Stores accounts, profiles, status, and session-version information |
+| `categories` | Stores album, artist, genre, language, year, and cover metadata |
+| `audio` | Stores song titles, secure storage keys, MIME metadata, and category links |
+| `videos` | Stores video titles, secure storage keys, MIME metadata, and category links |
+| `review_audio` | Stores one review/rating per user and audio track |
+| `messages` | Stores contact messages and read lifecycle data |
+| `request_limits` | Stores database-backed request-throttling state |
 
 ---
 
-## 🔐 Security Implementations
-
-| Security Area | Implementation |
-|---|---|
-| Password Security | Passwords are hashed using `password_hash()` |
-| Login Verification | Passwords are checked using `password_verify()` |
-| Session Protection | Protected pages use PHP session validation |
-| Role Flow | Admin and user login flows are separated by `role_id` |
-| Output Escaping | Several admin/message views use `htmlspecialchars()` |
-| Review Ownership | Users can edit/delete only their own reviews |
-| Message Status Control | Contact messages use controlled `pending` / `seen` status |
-
-> Recommended production improvements: prepared statements across all queries, CSRF tokens, stricter admin middleware, MIME/type validation for uploads, pagination, and environment-based database configuration.
-
----
-
-## ⚡ Performance & Code Quality
-
-- Uses SQL joins to combine media records with category metadata
-- Dashboard uses SQL count queries for quick admin summaries
-- Latest content sections use ordered queries and limits
-- Reusable `header.php` and `footer.php` files reduce duplicated layout code
-- Static assets are organized separately for admin and frontend
-- Media files are stored in dedicated upload directories
-- Database uses primary keys and foreign keys for main relationships
-
----
-
-## 📡 API / Routes
-
-This project does not include a REST API. It uses traditional PHP page endpoints and form submissions.
-
-| Endpoint | Purpose |
-|---|---|
-| `frontend/signup.php` | User registration |
-| `frontend/signin.php` | User login |
-| `frontend/music.php` | Music listing |
-| `frontend/detail.php` | Song detail and reviews |
-| `frontend/video.php` | Video gallery |
-| `frontend/contact.php` | Contact message submission |
-| `admin/login.php` | Admin login |
-| `admin/index.php` | Admin dashboard |
-| `admin/add_music.php` | Upload music |
-| `admin/add_video.php` | Upload video |
-| `admin/message.php` | Manage contact messages |
-
----
-
-## ⚙️ Installation Guide
+## ⚙️ Installation
 
 ### Requirements
 
-- PHP 8.x
-- MySQL / MariaDB
-- Apache server
-- XAMPP, WAMP, Laragon, or similar local environment
-- phpMyAdmin recommended
+- Windows with XAMPP, or another Apache/PHP/MySQL environment
+- PHP 8.2 or later with `mysqli`, `mysqlnd`, `fileinfo`, `mbstring`, `openssl`, XML and DOM extensions
+- MySQL or MariaDB
+- Composer for installing PHPUnit and running development checks
 
 ### Setup Steps
 
-1. Clone or download the repository.
+1. Clone or download the repository into XAMPP:
 
-```bash
-git clone https://github.com/your-username/one-sound.git
+```powershell
+git clone <your-repository-url> "C:\xampp\htdocs\One Sound"
+Set-Location "C:\xampp\htdocs\One Sound"
 ```
 
-2. Move the project folder into your local server directory.
+2. Install the locked development dependencies:
 
-```text
-xampp/htdocs/One Sound
+```powershell
+composer install --prefer-dist --no-interaction
 ```
 
-3. Start Apache and MySQL.
+3. Create the local configuration:
 
-4. Create a database named:
-
-```sql
-sounds
+```powershell
+Copy-Item .\config.example.php .\config.local.php
+notepad .\config.local.php
 ```
 
-5. Import the database file:
+Recommended local database settings:
+
+```php
+'database' => [
+    'host' => '127.0.0.1',
+    'port' => 3306,
+    'name' => 'sounds',
+    'user' => 'root',
+    'password' => '',
+],
+```
+
+4. Create the database named `sounds` and import:
 
 ```text
 database/sounds.sql
 ```
 
-6. Update database credentials if required:
+5. Ensure the private media path configured in `config.local.php` exists, for example:
 
 ```text
-admin/database.php
-frontend/database.php
+C:\xampp\one-sound-private-media
 ```
 
-Default local configuration:
+6. Start Apache and MySQL through XAMPP.
 
-```php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "sounds";
-```
-
-7. Open the project in your browser.
+7. Open the website:
 
 ```text
-Frontend: http://localhost/One%20Sound/frontend/home.php
-Admin:    http://localhost/One%20Sound/admin/login.php
+Public homepage: http://localhost/One%20Sound/frontend/home.php
+User login:     http://localhost/One%20Sound/frontend/signin.php
+Admin login:    http://localhost/One%20Sound/admin/login.php
 ```
+
+### Existing Database Upgrade
+
+For an older `sounds` database, create a backup and run once:
+
+```powershell
+php .\scripts\migrate.php
+```
+
+When the previous MP3/MP4 files are available only in an older project folder or ZIP archive, restore them into private storage with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\restore_private_media.ps1 `
+    -OriginalSource "C:\path\to\One Sound(1).zip"
+```
+
+The restoration utility copies only media referenced by the existing database, stores it outside `htdocs`, updates the secure storage keys, and verifies public homepage audio/video range requests. It does not delete the source archive.
 
 ---
 
-## 🔑 Demo Credentials
+## 🔑 Fresh-Install Demo Credentials
 
-### Admin
+### Administrator
 
 ```text
-Email: admin@admin.com
-Password: admin
+Email:    admin.demo@example.test
+Password: AdminDemo123!
 ```
 
 ### User
 
 ```text
-Email: ali@ali.com
-Password: ali
+Email:    user.demo@example.test
+Password: UserDemo123!
 ```
 
-> Demo credentials are for local testing only. Change them before deploying the project.
+> Demo accounts are intended only for local evaluation. Change or remove them before any public deployment.
 
 ---
 
-## 📁 Important Folder Structure
+## ▶️ Usage
+
+### Public Visitor
+
+1. Open `frontend/home.php`.
+2. Play the trending song and initially displayed audio/video previews.
+3. View the initially displayed albums, collections, and gallery.
+4. Select a “Login For More” button to sign in for the complete catalog.
+
+### Registered User
+
+1. Sign in through `frontend/signin.php`.
+2. Browse all music, albums, videos, categories, and search pages.
+3. Play media, manage your profile, and submit one review per song.
+4. Send a contact message to the administrator.
+
+### Administrator
+
+1. Sign in through `admin/login.php`.
+2. Manage users, categories, music, videos, messages, profile, and password.
+3. Upload only media you own or are authorized to use.
+
+---
+
+## 🧪 Testing
+
+Create the isolated test database from `database/sounds.sql`, then run:
+
+```powershell
+composer validate --strict --no-check-publish
+composer audit --locked
+php .\scripts\lint.php
+php .\scripts\check_repository.php
+php .\vendor\bin\phpunit --configuration .\phpunit.xml.dist
+```
+
+The complete suite should finish with no failures and no skipped database integration tests.
+
+---
+
+## 🔐 Security
+
+The project includes:
+
+- Prepared statements for request-driven database operations
+- CSRF protection for state-changing requests
+- Administrator and User authorization checks
+- Session ID regeneration and global password-change session revocation
+- Current-password verification
+- Server-side validation and output escaping
+- Database-backed request throttling
+- Upload MIME, extension, size, filename, dimension, and signature validation
+- Private media storage with controlled range-enabled delivery
+- Database uniqueness, check constraints, indexes, and foreign keys
+- Generic production error output and private error logging
+
+---
+
+## 📄 License
+
+This project is released under the **MIT License**.
 
 ```text
-admin/
-├── add_music.php
-├── add_video.php
-├── view_music.php
-├── view_video.php
-├── view_user.php
-├── view_role.php
-├── message.php
-├── uploads/
-│   ├── images/
-│   ├── music/
-│   └── videos/
-└── database.php
-
-frontend/
-├── home.php
-├── signin.php
-├── signup.php
-├── music.php
-├── album.php
-├── video.php
-├── detail.php
-├── review_audio.php
-├── profile.php
-├── contact.php
-└── database.php
-
-database/
-└── sounds.sql
+Copyright (c) Muhammad Ali Nawaz
 ```
 
----
-
-## 🧪 Testing Checklist
-
-- [ ] Import database successfully  
-- [ ] Login as admin  
-- [ ] Add category metadata  
-- [ ] Upload music file  
-- [ ] Upload video file  
-- [ ] View dashboard counts  
-- [ ] Register a new user  
-- [ ] Login as user  
-- [ ] Browse music and videos  
-- [ ] Search songs/albums/videos  
-- [ ] Submit song review  
-- [ ] Edit/delete own review  
-- [ ] Submit contact message  
-- [ ] Mark message as read from admin panel  
+See [`LICENSE`](LICENSE).
 
 ---
 
-## 🔮 Future Improvements
+## 👨‍💻 Credits
 
-- Convert raw SQL queries to prepared statements
-- Add CSRF protection for forms and delete actions
-- Add stronger admin-only authorization middleware
-- Add upload validation for file type, MIME type, and size
-- Add pagination for large media lists
-- Add playlists and favorite songs
-- Add REST API for future mobile/frontend clients
-- Add Docker setup and deployment documentation
-- Add automated tests for authentication and CRUD workflows
-- Migrate to Laravel MVC structure for larger-scale maintainability
-
----
-
-## 👨‍💻 Author
-
-**Muhammad Ali Nawaz**  
-Full-Stack PHP Developer
-
-Built as a portfolio project to demonstrate practical PHP/MySQL development, admin dashboard workflows, authentication, media management, relational database design, and user-facing web application features.
+**Developed and Owned by Muhammad Ali Nawaz**  
+Sole Owner • Backend Developer • Frontend Developer
 
 ---
 
 <p align="center">
-  <b>⭐ If you like this project, consider starring the repository!</b>
+  <b>⭐ One Sound — Core PHP & MySQL Portfolio Project</b>
 </p>

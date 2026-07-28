@@ -1,0 +1,11 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule (^|/)\. - [F,L]
+    RewriteRule ^(?:includes|database|tests|scripts|vendor)(?:/|$) - [F,L,NC]
+</IfModule>
+
+<FilesMatch "^(?:config(?:\.example|\.local)?\.php|composer\.(?:json|lock)|phpunit\.xml(?:\.dist)?|README\.md|SECURITY\.md)$">
+    Require all denied
+</FilesMatch>

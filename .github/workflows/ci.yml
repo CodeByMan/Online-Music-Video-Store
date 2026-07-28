@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_DATABASE: sounds_test
+          MARIADB_USER: one_sound
+          MARIADB_PASSWORD: one_sound_test
+          MARIADB_ROOT_PASSWORD: root_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      APP_ENV: testing
+      APP_DEBUG: "false"
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: sounds_test
+      DB_USERNAME: one_sound
+      DB_PASSWORD: one_sound_test
+      MEDIA_STORAGE_PATH: ${{ github.workspace }}/.test-private-media
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mysqli, fileinfo, mbstring, dom, xml, xmlwriter
+          coverage: none
+      - name: Validate Composer configuration
+        run: composer validate --strict --no-check-publish
+      - name: Install test dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Import test database
+        run: mysql --host="$DB_HOST" --port="$DB_PORT" --user="$DB_USERNAME" --password="$DB_PASSWORD" "$DB_DATABASE" < database/sounds.sql
+      - name: Lint PHP
+        run: composer lint
+      - name: Run PHPUnit
+        run: composer test
+      - name: Run repository checks
+        run: composer static
+      - name: Audit Composer dependencies
+        run: composer audit

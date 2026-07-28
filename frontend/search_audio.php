@@ -1,100 +1,32 @@
 <?php
-session_start();
-include 'header.php';
-
-$search_query = '';
-if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST['search_query'])) {
-    $search_query = mysqli_real_escape_string($conn, $_POST['search_query']);
+require_once dirname(__DIR__) . '/includes/bootstrap.php';
+$current_user = require_frontend_user($conn);
+$error = '';
+try {
+    $searchQuery = input_search($_GET);
+} catch (InvalidArgumentException $exception) {
+    $searchQuery = '';
+    $error = $exception->getMessage();
 }
-
-$sql_audio = "
-    SELECT audio.audio_id, audio.audio_name, audio.category_id, 
-           categories.category_artist, categories.category_album, categories.category_genre, categories.category_language, categories.category_year, categories.category_image
-    FROM audio 
-    INNER JOIN categories ON audio.category_id = categories.category_id
-    WHERE audio.audio_name LIKE '%$search_query%' 
-    OR categories.category_artist LIKE '%$search_query%' 
-    OR categories.category_album LIKE '%$search_query%' 
-    OR categories.category_genre LIKE '%$search_query%' 
-    OR categories.category_language LIKE '%$search_query%' 
-    OR categories.category_year LIKE '%$search_query%';
-";
-
-$result_audio = mysqli_query($conn, $sql_audio);
+$pagination = pagination_state($_GET, 20);
+$condition = catalog_search_condition('a.audio_title', $searchQuery);
+$countRow = db_fetch_one($conn, 'SELECT COUNT(*) AS total FROM audio a INNER JOIN categories c ON a.category_id = c.category_id WHERE ' . $condition['where'], $condition['types'], $condition['params']);
+$total = (int) ($countRow['total'] ?? 0);
+$audioResults = db_fetch_all(
+    $conn,
+    'SELECT a.audio_id, a.audio_title, c.category_artist, c.category_album, c.category_genre, c.category_year
+     FROM audio a INNER JOIN categories c ON a.category_id = c.category_id
+     WHERE ' . $condition['where'] . ' ORDER BY a.audio_title ASC LIMIT ? OFFSET ?',
+    $condition['types'] . 'ii',
+    array_merge($condition['params'], [$pagination['per_page'], $pagination['offset']])
+);
+$totalPages = pagination_total_pages($total, $pagination['per_page']);
+include 'header.php';
 ?>
-
-<!-- bradcam_area -->
-<div class="bradcam_area breadcam_bg_2">
-    <div class="container">
-        <div class="row">
-            <div class="col-xl-12">
-                <div class="bradcam_text text-center">
-                    <h3>Songs</h3>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!--/ bradcam_area -->
-
-<section>
-<div class="container mt-5">
-    <h4 class="text-center">Search Albums By Categories:</h4>
-        <p class="text-center">(Artist - Genre - Language - Year)</p>
-            <!-- Search Form (Centered) -->
-            <div class="col-12 text-center">
-                <form method="POST" action="search_audio.php" class="d-flex justify-content-center">
-                    <div class="input-group" style="max-width: 400px;">
-                        <input type="search" name="search_query" class="form-control form-control-sm" placeholder="Search" aria-label="Search">
-                        <button class="btn btn-danger btn-sm" type="submit" style="margin-left: 10px;">Search</button>
-                    </div>
-                </form>
-            </div>
-
-    <!-- Line above Navigation Buttons -->
-    <hr class="mb-4">
-
-<!-- audio content -->
-    <h5>Search Results for "<?php echo htmlspecialchars($search_query); ?>" - Audio</h5>
-
-    <!-- Display audio results in table format -->
-    <?php if (mysqli_num_rows($result_audio) > 0): ?>
-        <table class='table table-bordered' style='table-layout: fixed;'>
-            <thead class='bg-danger text-white'>
-                <tr>
-                    <th style="width: 30%;">Song</th>
-                    <th style="width: 20%;">Artist</th>
-                    <th style="width: 20%;">Album</th>
-                    <th style="width: 15%;">Genre</th>
-                    <th style="width: 15%;">Year</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                while ($row = mysqli_fetch_assoc($result_audio)) {
-                ?>
-                <tr>
-                    <td><a class="text-danger" href="detail.php?audio_id=<?php echo htmlspecialchars($row['audio_id']); ?>"><?php echo htmlspecialchars($row['audio_name']); ?> (Click Here)</a></td>
-                    <td><strong><?php echo htmlspecialchars($row['category_artist']); ?></strong></td>
-                    <td><strong><?php echo htmlspecialchars($row['category_album']); ?></strong></td>
-                    <td><strong><?php echo htmlspecialchars($row['category_genre']); ?></strong></td>
-                    <td><strong><?php echo htmlspecialchars($row['category_year']); ?></strong></td>
-                </tr>
-                <?php
-                }
-                ?>
-            </tbody>
-        </table>
-    <?php else: ?>
-        <p>No audio files found.</p>
-    <?php endif; ?>
-    <div class="d-flex justify-content-center">
-            <a href="music.php" class="btn oneMusic-btn m-5">Back To All Music</a>
-    </div>
-</div>
-</section>
-<!-- audio content -->
-
-<?php
-include 'footer.php';
-?>
+<div class="bradcam_area breadcam_bg_2"><div class="container"><div class="row"><div class="col-xl-12"><div class="bradcam_text text-center"><h3>Songs</h3></div></div></div></div></div>
+<section><div class="container mt-5"><h4 class="text-center">Search Music By Categories:</h4><p class="text-center">(Title - Artist - Album - Genre - Language - Year)</p>
+<div class="col-12 text-center"><form method="GET" action="search_audio.php" class="d-flex justify-content-center"><div class="input-group" style="max-width: 400px;"><input type="search" name="q" value="<?php echo e($searchQuery); ?>" class="form-control form-control-sm" placeholder="Search" aria-label="Search music"><button class="btn btn-danger btn-sm" type="submit" style="margin-left: 10px;">Search</button></div></form></div><hr class="mb-4"><h5>Search Results for “<?php echo e($searchQuery); ?>” — Audio</h5>
+<?php if ($error !== ''): ?><div class="alert alert-danger" role="alert"><?php echo e($error); ?></div><?php endif; ?>
+<?php if ($audioResults !== []): ?><div class="table-responsive"><table class="table table-bordered" style="table-layout: fixed;"><thead class="bg-danger text-white"><tr><th>Song</th><th>Artist</th><th>Album</th><th>Genre</th><th>Year</th></tr></thead><tbody><?php foreach ($audioResults as $row): ?><tr><td><a class="text-danger" href="detail.php?audio_id=<?php echo (int) $row['audio_id']; ?>"><?php echo e($row['audio_title']); ?> (Click Here)</a></td><td><strong><?php echo e($row['category_artist']); ?></strong></td><td><strong><?php echo e($row['category_album']); ?></strong></td><td><strong><?php echo e($row['category_genre']); ?></strong></td><td><strong><?php echo (int) $row['category_year']; ?></strong></td></tr><?php endforeach; ?></tbody></table></div><?php else: ?><p>No audio files found.</p><?php endif; ?>
+<?php echo pagination_links($pagination['page'], $totalPages, ['q' => $searchQuery]); ?><div class="d-flex justify-content-center"><a href="music.php" class="btn oneMusic-btn m-5">Back To All Music</a></div></div></section>
+<?php include 'footer.php'; ?>

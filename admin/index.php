@@ -1,35 +1,27 @@
-    <?php
-    include 'header.php';
-    ?>
+<?php
+include 'header.php';
 
-<h3 class="text-gray-600 text-center">Hi, <?php echo $user_name; ?></h3>
+$summary = db_fetch_one(
+    $conn,
+    "SELECT
+        (SELECT COUNT(*) FROM roles) AS total_roles,
+        (SELECT COUNT(*) FROM users) AS total_users,
+        (SELECT COUNT(*) FROM audio) AS total_music,
+        (SELECT COUNT(*) FROM videos) AS total_videos,
+        (SELECT COUNT(*) FROM messages WHERE message_status = 'pending') AS total_pending_messages"
+) ?? [];
+
+$totalRoles = (int) ($summary['total_roles'] ?? 0);
+$totalUsers = (int) ($summary['total_users'] ?? 0);
+$totalMusic = (int) ($summary['total_music'] ?? 0);
+$totalVideos = (int) ($summary['total_videos'] ?? 0);
+$totalMessages = (int) ($summary['total_pending_messages'] ?? 0);
+?>
+
+<h3 class="text-gray-600 text-center">Hi, <?php echo e($current_user['user_name']); ?></h3>
 
 <div class="container mt-5">
     <h5 class="mb-4">Data Summary</h5>
-    <?php
-
-    $sql = "
-        SELECT 
-            (SELECT COUNT(*) FROM roles) AS total_roles,
-            (SELECT COUNT(*) FROM users) AS total_users,
-            (SELECT COUNT(*) FROM audio) AS total_music,
-            (SELECT COUNT(*) FROM videos) AS total_videos,
-            (SELECT COUNT(*) FROM messages WHERE message_status = 'pending') AS total_pending_messages
-    ";
-    $result = $conn->query($sql);
-
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $total_roles = $row['total_roles'];
-            $total_users = $row['total_users'];
-            $total_music = $row['total_music'];
-            $total_videos = $row['total_videos'];
-            $total_messages = $row['total_pending_messages'];
-        }
-    } else {
-        echo "0 results";
-    }
-    ?> 
     <table class="table table-bordered">
         <thead class="bg-primary text-white">
             <tr>
@@ -38,31 +30,28 @@
             </tr>
         </thead>
         <tbody>
-        <tr>
+            <tr>
                 <td>Total Roles</td>
-                <td><?php echo $total_roles; ?></td>
+                <td><?php echo (int) $totalRoles; ?></td>
             </tr>
             <tr>
                 <td>Total Users</td>
-                <td><?php echo $total_users; ?></td>
+                <td><?php echo (int) $totalUsers; ?></td>
             </tr>
             <tr>
                 <td>Total Music</td>
-                <td><?php echo $total_music; ?></td>
+                <td><?php echo (int) $totalMusic; ?></td>
             </tr>
             <tr>
                 <td>Total Videos</td>
-                <td><?php echo $total_videos; ?></td>
+                <td><?php echo (int) $totalVideos; ?></td>
             </tr>
             <tr>
                 <td>Pending Messages</td>
-                <td><?php echo $total_messages; ?></td>
+                <td><?php echo (int) $totalMessages; ?></td>
             </tr>
         </tbody>
     </table>
 </div>
 
-
-    <?php
-    include 'footer.php';
-    ?>
+<?php include 'footer.php'; ?>

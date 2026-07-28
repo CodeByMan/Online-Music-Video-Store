@@ -1,78 +1,66 @@
-# ==============================
-# One Sound - Git Ignore Rules
-# ==============================
-
-# OS / System files
+# Operating-system and editor files
 .DS_Store
 Thumbs.db
 desktop.ini
-
-# Editor / IDE files
 .vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
 
-# Logs
-*.log
-logs/
-
-# Environment / Local config
+# Local configuration and secrets
 .env
-.env.local
-config.local.php
-database.local.php
+.env.*
+!.env.example
+/config.local.php
+/database.local.php
 
-# Temporary / Cache files
-tmp/
-temp/
-cache/
+# Runtime and temporary files
+*.log
+/logs/
+/tmp/
+/temp/
+/cache/
+/storage/test-reports/
+/.phpunit.cache/
+/.phpunit.result.cache
+/.test-private-media/
 *.tmp
 *.bak
+*.backup-*
 *.swp
 
-# Dependency folders if added later
-vendor/
-node_modules/
+# Composer development dependencies
+/vendor/
 
-# Composer lock can be tracked if Composer is added later.
-# composer.lock
-
-# NPM build/cache files if frontend tooling is added later
+# Node dependencies are not required at runtime
+/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# ==============================
-# Uploaded Media Files
-# ==============================
-# Do not upload large/copyrighted media files to GitHub.
-# Keep only folder structure using .gitkeep files.
-
+# Uploaded catalog images: keep protection and placeholders only
 admin/uploads/images/*
+!admin/uploads/images/.gitkeep
+!admin/uploads/images/.htaccess
+
+# Legacy public media folders: keep protection and placeholders only
 admin/uploads/music/*
 admin/uploads/videos/*
-
-!admin/uploads/images/.gitkeep
 !admin/uploads/music/.gitkeep
+!admin/uploads/music/.htaccess
 !admin/uploads/videos/.gitkeep
+!admin/uploads/videos/.htaccess
 
-# If user profile uploads are added later
-frontend/uploads/*
-!frontend/uploads/.gitkeep
+# Private audio/video storage must remain outside the web root
+/private-media/
+/one-sound-private-media/
 
-# ==============================
-# Demo / Local Video Files
-# ==============================
-# Never upload large demo videos or recorded walkthroughs to GitHub.
+# Runtime profile images
+admin/img/profile-img/user_*
+frontend/img/banner/user_*
 
-Website Video/
-website video/
-Videos/
-videos/
-Demo Videos/
-demo-videos/
-
+# Large media must never be committed
+*.mp3
 *.mp4
 *.mov
 *.avi
@@ -80,12 +68,29 @@ demo-videos/
 *.webm
 *.wmv
 *.flv
+*.wav
+*.flac
+*.aac
+*.m4a
 
-# ==============================
-# Screenshots
-# ==============================
-# Keep screenshots tracked for README.
-# docs/screenshots/*.png
-# docs/screenshots/*.jpg
-# docs/screenshots/*.jpeg
-# docs/screenshots/*.webp
+# Local walkthrough recordings
+Website Video/
+website video/
+Videos/
+Demo Videos/
+demo-videos/
+# Local archives and generated release output
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+*.sql.gz
+/repair-output/
+/release-output/
+
+# Generated reports and build output
+/coverage/
+/test-results/
+/reports/
+/build/

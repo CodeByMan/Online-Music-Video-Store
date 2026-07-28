@@ -1,30 +1,17 @@
 <?php
-session_start();
-include 'database.php';
-
-if (isset($_GET['review_id'])) {
-    $review_id = $_GET['review_id'];
-
-    // Fetch the review details
-    $query = "SELECT * FROM review_audio WHERE review_id = '$review_id'";
-    $result = mysqli_query($conn, $query);
-    $review = mysqli_fetch_assoc($result);
-
-    // Check if the logged-in user is the same as the reviewer
-    if ($_SESSION['user_id'] != $review['user_id']) {
-        // If the user is not the reviewer, redirect to a page
-        header('Location: signin.php');
-        exit;
+require_once dirname(__DIR__) . '/includes/bootstrap.php';
+$current_user = require_frontend_user($conn);
+require_post_request();
+try {
+    verify_csrf();
+    $reviewId = request_positive_int($_POST, 'review_id');
+    $review = db_fetch_one($conn, 'SELECT audio_id FROM review_audio WHERE review_id = ? AND user_id = ? LIMIT 1', 'ii', [$reviewId, (int) $current_user['user_id']]);
+    if ($review === null) {
+        throw new RuntimeException('Review not found or you are not allowed to delete it.');
     }
-
-    // Delete the review
-    $delete_query = "DELETE FROM review_audio WHERE review_id = '$review_id'";
-    mysqli_query($conn, $delete_query);
-
-    // Redirect back to the audio details page
-    header('Location: detail.php?audio_id=' . $review['audio_id']);
-    exit;
-} else {
-    echo "Review not found!";
-    exit;
+    db_execute($conn, 'DELETE FROM review_audio WHERE review_id = ? AND user_id = ?', 'ii', [$reviewId, (int) $current_user['user_id']]);
+    redirect_with_flash('detail.php?audio_id=' . (int) $review['audio_id'], 'Review deleted successfully.');
+} catch (Throwable $exception) {
+    error_log('[One Sound] Review delete error: ' . $exception->getMessage());
+    redirect_with_flash('music.php', 'Unable to delete the review.', 'danger');
 }

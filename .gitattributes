@@ -1,0 +1,59 @@
+# Normalize text files in Git and keep source code as LF.
+* text=auto
+
+# Application and configuration source
+*.php       text eol=lf
+*.phtml     text eol=lf
+*.inc       text eol=lf
+*.sql       text eol=lf
+*.js        text eol=lf
+*.css       text eol=lf
+*.scss      text eol=lf
+*.json      text eol=lf
+*.xml       text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.md        text eol=lf
+*.txt       text eol=lf
+*.html      text eol=lf
+*.htm       text eol=lf
+*.svg       text eol=lf
+*.gitignore text eol=lf
+*.gitattributes text eol=lf
+.htaccess   text eol=lf
+
+# Windows command files retain CRLF.
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+*.ps1       text eol=crlf
+
+# Binary files must never be line-ending normalized.
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.webp      binary
+*.ico       binary
+*.bmp       binary
+
+*.eot       binary
+*.ttf       binary
+*.otf       binary
+*.woff      binary
+*.woff2     binary
+
+*.pdf       binary
+*.zip       binary
+*.rar       binary
+*.7z        binary
+*.gz        binary
+*.tar       binary
+
+*.mp3       binary
+*.mp4       binary
+*.wav       binary
+*.flac      binary
+*.avi       binary
+*.mov       binary
+*.mkv       binary
+*.webm      binary

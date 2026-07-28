@@ -1,343 +1,170 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1
--- Generation Time: Feb 14, 2025 at 12:38 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- One Sound clean development schema
+-- MariaDB 10.4+ / MySQL 8+
+-- Contains fictional demo accounts only. Commercial music/video files are intentionally excluded.
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
+SET NAMES utf8mb4;
+SET time_zone = '+00:00';
+SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS request_limits;
+DROP TABLE IF EXISTS review_audio;
+DROP TABLE IF EXISTS videos;
+DROP TABLE IF EXISTS audio;
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS roles;
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+CREATE TABLE roles (
+  role_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  role_type VARCHAR(50) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (role_id),
+  UNIQUE KEY uq_roles_type (role_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Database: `sounds`
---
+CREATE TABLE users (
+  user_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_name VARCHAR(100) NOT NULL,
+  user_phone VARCHAR(30) NOT NULL,
+  user_address VARCHAR(255) NOT NULL,
+  user_email VARCHAR(254) NOT NULL,
+  user_password VARCHAR(255) NOT NULL,
+  session_version INT UNSIGNED NOT NULL DEFAULT 1,
+  user_image VARCHAR(255) NOT NULL DEFAULT 'vector.jpg',
+  role_id INT UNSIGNED NOT NULL,
+  account_status ENUM('active','disabled') NOT NULL DEFAULT 'active',
+  disabled_at DATETIME NULL,
+  last_login_at DATETIME NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id),
+  UNIQUE KEY uq_users_email (user_email),
+  KEY idx_users_role (role_id),
+  KEY idx_users_status (account_status),
+  CONSTRAINT fk_users_role FOREIGN KEY (role_id) REFERENCES roles (role_id)
+    ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
+-- "categories" is intentionally a compact catalog-metadata table for this educational project.
+-- It combines artist, album, genre, language, year and cover image to avoid over-engineering.
+CREATE TABLE categories (
+  category_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  category_artist VARCHAR(100) NOT NULL,
+  category_album VARCHAR(150) NOT NULL,
+  category_genre VARCHAR(100) NOT NULL,
+  category_language VARCHAR(100) NOT NULL,
+  category_year SMALLINT UNSIGNED NOT NULL,
+  category_image VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (category_id),
+  KEY idx_categories_artist (category_artist),
+  KEY idx_categories_album (category_album),
+  KEY idx_categories_genre (category_genre),
+  KEY idx_categories_language (category_language),
+  KEY idx_categories_year (category_year),
+  CONSTRAINT chk_category_year CHECK (category_year BETWEEN 1900 AND 2100)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Table structure for table `audio`
---
+CREATE TABLE audio (
+  audio_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  audio_title VARCHAR(180) NOT NULL,
+  audio_name VARCHAR(80) NOT NULL COMMENT 'Random server-side storage key',
+  audio_original_name VARCHAR(180) NOT NULL,
+  audio_mime_type VARCHAR(100) NOT NULL DEFAULT 'audio/mpeg',
+  audio_size_bytes INT UNSIGNED NOT NULL DEFAULT 0,
+  category_id INT UNSIGNED NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (audio_id),
+  UNIQUE KEY uq_audio_name (audio_name),
+  KEY idx_audio_category (category_id),
+  KEY idx_audio_title (audio_title),
+  CONSTRAINT fk_audio_category FOREIGN KEY (category_id) REFERENCES categories (category_id)
+    ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE `audio` (
-  `audio_id` int(11) NOT NULL,
-  `audio_name` varchar(255) NOT NULL,
-  `category_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE videos (
+  video_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  video_title VARCHAR(180) NOT NULL,
+  video_name VARCHAR(80) NOT NULL COMMENT 'Random server-side storage key',
+  video_original_name VARCHAR(180) NOT NULL,
+  video_mime_type VARCHAR(100) NOT NULL DEFAULT 'video/mp4',
+  video_size_bytes INT UNSIGNED NOT NULL DEFAULT 0,
+  category_id INT UNSIGNED NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (video_id),
+  UNIQUE KEY uq_video_name (video_name),
+  KEY idx_video_category (category_id),
+  KEY idx_video_title (video_title),
+  CONSTRAINT fk_video_category FOREIGN KEY (category_id) REFERENCES categories (category_id)
+    ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `audio`
---
+CREATE TABLE messages (
+  message_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  message_name VARCHAR(100) NOT NULL,
+  message_email VARCHAR(254) NOT NULL,
+  message_subject VARCHAR(150) NOT NULL,
+  message_detail TEXT NOT NULL,
+  message_status ENUM('pending','seen') NOT NULL DEFAULT 'pending',
+  read_at DATETIME NULL,
+  read_by INT UNSIGNED NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (message_id),
+  KEY idx_messages_status_created (message_status, created_at),
+  KEY idx_messages_read_by (read_by),
+  CONSTRAINT fk_messages_read_by FOREIGN KEY (read_by) REFERENCES users (user_id)
+    ON UPDATE CASCADE ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `audio` (`audio_id`, `audio_name`, `category_id`) VALUES
-(28, 'Lm3allem.mp3', 30),
-(29, 'Guli Mata.mp3', 31),
-(30, 'Baddek Eih.mp3', 32),
-(34, 'Enty Hayaty.mp3', 34),
-(35, 'Gangnam Style.mp3', 35),
-(36, 'Gentleman.mp3', 36),
-(37, 'Bad.mp3', 37),
-(38, 'Beat It.mp3', 38),
-(39, 'Dangerous.mp3', 39),
-(40, 'Shape Of You.mp3', 40),
-(41, 'Bloodstream.mp3', 41),
-(42, 'Perfect.mp3', 40),
-(43, 'Photograph.mp3', 41),
-(44, 'Closer.mp3', 42),
-(45, 'Despacito.mp3', 43),
-(46, 'Count On Me.mp3', 44),
-(47, 'Thats What I Like.mp3', 45),
-(48, 'Uptown Funk.mp3', 46),
-(49, 'Baby.mp3', 47),
-(50, 'Boyfriend.mp3', 48),
-(51, 'Yummy.mp3', 49);
+CREATE TABLE review_audio (
+  review_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  review_text VARCHAR(255) NOT NULL,
+  review_rating TINYINT UNSIGNED NOT NULL,
+  audio_id INT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  review_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (review_id),
+  UNIQUE KEY uq_review_audio_user (audio_id, user_id),
+  KEY idx_review_user (user_id),
+  KEY idx_review_date (review_date),
+  CONSTRAINT fk_review_audio FOREIGN KEY (audio_id) REFERENCES audio (audio_id)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT fk_review_user FOREIGN KEY (user_id) REFERENCES users (user_id)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT chk_review_rating CHECK (review_rating BETWEEN 1 AND 5)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
+CREATE TABLE request_limits (
+  limit_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  action_name VARCHAR(40) NOT NULL,
+  rate_key CHAR(64) NOT NULL,
+  attempt_count SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  window_started_at DATETIME NOT NULL,
+  last_attempt_at DATETIME NOT NULL,
+  blocked_until DATETIME NULL,
+  PRIMARY KEY (limit_id),
+  UNIQUE KEY uq_request_limit_action_key (action_name, rate_key),
+  KEY idx_request_limits_cleanup (blocked_until, last_attempt_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Table structure for table `categories`
---
+INSERT INTO roles (role_id, role_type) VALUES
+  (1, 'Administrator'),
+  (2, 'User');
 
-CREATE TABLE `categories` (
-  `category_id` int(11) NOT NULL,
-  `category_artist` varchar(255) NOT NULL,
-  `category_album` varchar(255) NOT NULL,
-  `category_genre` varchar(255) NOT NULL,
-  `category_language` varchar(255) NOT NULL,
-  `category_year` int(11) NOT NULL,
-  `category_image` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- Demo passwords:
+-- admin.demo@example.test = AdminDemo123!
+-- user.demo@example.test  = UserDemo123!
+INSERT INTO users
+  (user_id, user_name, user_phone, user_address, user_email, user_password, user_image, role_id)
+VALUES
+  (1, 'Demo Administrator', '+92 300 0000000', 'Fictional portfolio data', 'admin.demo@example.test', '$2y$12$7k1xu6GpI3PramIGZzZiieceuAEMXpBiE5q0Y6.fid50GjyhvgJL6', 'vector.jpg', 1),
+  (2, 'Demo User', '+92 300 0000001', 'Fictional portfolio data', 'user.demo@example.test', '$2y$12$tsXrVLhi27xJ.jD.dvkUA.EXoNWUgWfBk2h.9gpEMrYNpOE3e.pHW', 'vector.jpg', 2);
 
---
--- Dumping data for table `categories`
---
-
-INSERT INTO `categories` (`category_id`, `category_artist`, `category_album`, `category_genre`, `category_language`, `category_year`, `category_image`) VALUES
-(30, 'Saad Lamjarred', 'LM3ALLEM', 'Pop', 'Arabic', 2015, 'Lm3allem.jpg'),
-(31, 'Saad Lamjarred', 'Guli Mata', 'Romance', 'Arabic', 2023, 'Guli Mata.jpg'),
-(32, 'Saad Lamjarred', 'Baddek Eih', 'Pop', 'Arabic', 2018, 'Baddek Eih.jpg'),
-(34, 'Saad Lamjarred', 'Enty Hayaty', 'Pop', 'Arabic', 2021, 'Enty Hayaty.jpg'),
-(35, 'Psy', 'Psy 6 (Six Rules)', 'K-Pop', 'Korean', 2012, 'Gangnam Style.png'),
-(36, 'Psy', 'Gentleman', 'K-Pop', 'Korean', 2013, 'Gentleman.jpg'),
-(37, 'Michael Jackson', 'Bad', 'Dance-Pop', 'English', 1987, 'Bad.jpg'),
-(38, 'Michael Jackson', 'Thriller', 'Dance-Pop', 'English', 1982, 'Beat It.jpg'),
-(39, 'Michael Jackson', 'Studio Album', 'Pop-Music', 'English', 1991, 'Dangerous.jpg'),
-(40, 'Ed Sheeran', '÷', 'Pop-Music', 'English', 2017, 'Shape Of You.jpg'),
-(41, 'Ed Sheeran', 'x', 'Pop', 'English', 2014, 'bloodstream.jpg'),
-(42, 'The Chainsmokers', 'Memories...Do Not Open', 'Pop', 'English', 2017, 'closer.jpg'),
-(43, ' Luis Fonsi', 'Despacito', 'Pop', 'Spanish', 2017, 'descacito.png'),
-(44, 'Bruno Mars', 'Doo-Wops & Hooligans', 'Folk', 'English', 2010, 'count.jpg'),
-(45, 'Bruno Mars', '24K Magic', 'Hip-Hop', 'English', 2016, '24k.jpg'),
-(46, 'Bruno Mars', 'Uptown Special', 'Funk', 'English', 2014, 'funk.jpg'),
-(47, 'Justin Bieber', 'Studio Album', 'Pop', 'English', 2010, 'baby.jpg'),
-(48, 'Justin Bieber', 'Studio Album', 'Pop', 'English', 2012, 'boyfriend.jpg'),
-(49, 'Justin Bieber', 'Changes', 'Pop', 'English', 2020, 'yummy.jpg');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `messages`
---
-
-CREATE TABLE `messages` (
-  `message_id` int(11) NOT NULL,
-  `message_name` varchar(255) NOT NULL,
-  `message_email` varchar(255) NOT NULL,
-  `message_subject` varchar(255) NOT NULL,
-  `message_detail` varchar(255) NOT NULL,
-  `message_status` enum('pending','seen') DEFAULT 'pending'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `messages`
---
-
-INSERT INTO `messages` (`message_id`, `message_name`, `message_email`, `message_subject`, `message_detail`, `message_status`) VALUES
-(46, 'Irbaz', 'irbaz@gmail.com', 'Hello', 'Call me!', 'pending'),
-(47, 'Ali', 'ali@ali.com', 'Email login error', 'Help', 'pending');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `review_audio`
---
-
-CREATE TABLE `review_audio` (
-  `review_id` int(11) NOT NULL,
-  `review_text` varchar(255) NOT NULL,
-  `review_rating` varchar(255) NOT NULL,
-  `audio_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `review_date` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `review_audio`
---
-
-INSERT INTO `review_audio` (`review_id`, `review_text`, `review_rating`, `audio_id`, `user_id`, `review_date`) VALUES
-(32, 'Feeling Relaxed :)', '5', 50, 2, '2025-02-13 05:49:06');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `roles`
---
-
-CREATE TABLE `roles` (
-  `role_id` int(11) NOT NULL,
-  `role_type` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `roles`
---
-
-INSERT INTO `roles` (`role_id`, `role_type`) VALUES
-(1, 'Administrator'),
-(2, 'User');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `users`
---
-
-CREATE TABLE `users` (
-  `user_id` int(11) NOT NULL,
-  `user_name` varchar(255) NOT NULL,
-  `user_phone` varchar(255) NOT NULL,
-  `user_address` varchar(255) NOT NULL,
-  `user_email` varchar(255) NOT NULL,
-  `user_password` varchar(255) NOT NULL,
-  `user_image` varchar(255) NOT NULL DEFAULT 'vector.jpg',
-  `role_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`user_id`, `user_name`, `user_phone`, `user_address`, `user_email`, `user_password`, `user_image`, `role_id`) VALUES
-(1, 'Admin', '1234567890', 'Karachi', 'admin@admin.com', '$2y$10$YATESuqBmRBoxBMz53Xmd.Zaqx5fchswkef/W8L43DFAJliLgzGaW', 'vector.jpg', 1),
-(2, 'Ali Nawaz', '1234567890', ' Karachi', 'ali@ali.com', '$2y$10$bjKoeCmeRZrul7pE0NH/W.UlB/C7QNf4iEOC0Y3oEH71dRNrMcnV6', 'vector.jpg', 2);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `videos`
---
-
-CREATE TABLE `videos` (
-  `video_id` int(11) NOT NULL,
-  `video_name` varchar(255) NOT NULL,
-  `category_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `videos`
---
-
-INSERT INTO `videos` (`video_id`, `video_name`, `category_id`) VALUES
-(13, 'Lm3allem.mp4', 30),
-(14, 'Guli Mata.mp4', 31),
-(15, 'Gangnam.mp4', 35),
-(16, 'Bad.mp4', 37),
-(17, 'Despacito.mp4', 43),
-(18, 'Closer.mp4', 42),
-(19, 'yummy.mp4', 49),
-(20, 'Thats What I Like.mp4', 45),
-(21, 'funk.mp4', 46),
-(22, 'Perfect.mp4', 40),
-(23, 'boyfriend.mp4', 48),
-(24, 'Baby.mp4', 47);
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `audio`
---
-ALTER TABLE `audio`
-  ADD PRIMARY KEY (`audio_id`),
-  ADD KEY `category_audio_fk` (`category_id`);
-
---
--- Indexes for table `categories`
---
-ALTER TABLE `categories`
-  ADD PRIMARY KEY (`category_id`);
-
---
--- Indexes for table `messages`
---
-ALTER TABLE `messages`
-  ADD PRIMARY KEY (`message_id`);
-
---
--- Indexes for table `review_audio`
---
-ALTER TABLE `review_audio`
-  ADD PRIMARY KEY (`review_id`);
-
---
--- Indexes for table `roles`
---
-ALTER TABLE `roles`
-  ADD PRIMARY KEY (`role_id`);
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`user_id`),
-  ADD KEY `role_id_fk` (`role_id`);
-
---
--- Indexes for table `videos`
---
-ALTER TABLE `videos`
-  ADD PRIMARY KEY (`video_id`),
-  ADD KEY `category_video_fk` (`category_id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `audio`
---
-ALTER TABLE `audio`
-  MODIFY `audio_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
-
---
--- AUTO_INCREMENT for table `categories`
---
-ALTER TABLE `categories`
-  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
-
---
--- AUTO_INCREMENT for table `messages`
---
-ALTER TABLE `messages`
-  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
-
---
--- AUTO_INCREMENT for table `review_audio`
---
-ALTER TABLE `review_audio`
-  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
-
---
--- AUTO_INCREMENT for table `roles`
---
-ALTER TABLE `roles`
-  MODIFY `role_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
-
---
--- AUTO_INCREMENT for table `videos`
---
-ALTER TABLE `videos`
-  MODIFY `video_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `audio`
---
-ALTER TABLE `audio`
-  ADD CONSTRAINT `category_audio_fk` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`);
-
---
--- Constraints for table `users`
---
-ALTER TABLE `users`
-  ADD CONSTRAINT `role_id_fk` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`);
-
---
--- Constraints for table `videos`
---
-ALTER TABLE `videos`
-  ADD CONSTRAINT `category_video_fk` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`);
-COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+SET FOREIGN_KEY_CHECKS = 1;
