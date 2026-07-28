@@ -12,10 +12,6 @@
   <img src="https://img.shields.io/badge/Tests-PHPUnit-blue?style=for-the-badge" alt="PHPUnit" />
 </p>
 
-<p align="center">
-  <b>Public Media Previews</b> • <b>Full Music Library</b> • <b>Video Gallery</b> • <b>Admin Panel</b> • <b>User Reviews</b>
-</p>
-
 ---
 
 ## 📸 Project Screenshots
@@ -28,8 +24,6 @@
 |---|---|
 | ![One Sound latest album cards](docs/screenshots/albums.png) | ![One Sound collections section](docs/screenshots/collections.png) |
 
-> Screenshots must use fictional, original, or properly licensed demo media. Do not publish screenshots containing personal information, credentials, local filesystem paths, operating-system watermarks, or unlicensed commercial catalog artwork.
-
 ---
 
 ## 🚀 Project Overview
@@ -37,8 +31,6 @@
 **One Sound** is a complete educational media website built with **Core PHP, MySQL/MariaDB, HTML5, CSS3, Bootstrap, JavaScript, and jQuery**.
 
 Visitors can open the homepage without signing in and immediately preview the latest songs, videos, albums, collections, and gallery content. Registration and login unlock the complete music, video, album, search, review, profile, and contact workflows. Administrators use a separate dashboard to manage users, categories, audio, video, and contact messages.
-
-The project demonstrates practical junior-to-intermediate PHP development while intentionally remaining a traditional Core PHP application rather than a framework conversion.
 
 ---
 
@@ -323,25 +315,19 @@ The project includes:
 
 ---
 
-## 📄 License
+## 👨‍💻 Author
 
-This project is released under the **MIT License**.
-
-```text
-Copyright (c) Muhammad Ali Nawaz
-```
-
-See [`LICENSE`](LICENSE).
+**Muhammad Ali Nawaz**  
+Core PHP Developer
 
 ---
 
-## 👨‍💻 Credits
+## 📄 License
 
-**Developed and Owned by Muhammad Ali Nawaz**  
-Sole Owner • Backend Developer • Frontend Developer
+This project is open-sourced software licensed under the [MIT License](LICENSE).
 
 ---
 
 <p align="center">
-  <b>⭐ One Sound — Core PHP & MySQL Portfolio Project</b>
+  <b>⭐ If you like this project, consider starring the repository!</b>
 </p>
